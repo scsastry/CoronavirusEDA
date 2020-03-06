@@ -15,10 +15,17 @@ knitr::opts_chunk$set(echo = TRUE)
 #install.packages("naniar")
 #install.packages("skimr)
 #install.packages("visdat")
+#install.packages("devtools")
+#install.packages("rgeos")
+#install.packages("rgdal")
+library(devtools)
 library(visdat)
 library(tidyverse)
 library(naniar)
 library(skimr)
+library(ggmap)
+library(rgeos)
+library(rgdal)
 ```
 
 
@@ -33,3 +40,13 @@ readr::read_csv("data/2019_nCoV_20200121_20200206.csv")
 **Database of Coronavirus cases by geographical and bodily locaiton of isolation.**  
 Reference: Dong E, Du H, Gardner L. An interactive web-based dashboard to track COVID-19 in real time. Lancet Infect Dis; published online Feb 19. https://doi.org/10.1016/S1473-3099(20)30120-1. 
 Data: https://www.ncbi.nlm.nih.gov/labs/virus/vssi/#/virus?SeqType_s=Nucleotide&Region_s=Asia&Region_s=Europe&Region_s=North%20America&VirusLineage_ss=Wuhan%20seafood%20market%20pneumonia%20virus,%20taxid:2697049
+
+```{r}
+readr::read_csv("data/corona_protein.txt")
+
+```
+
+```{r}
+readr::read_csv("data/SARS-CoV-2_Genbank.csv")
+```
+
