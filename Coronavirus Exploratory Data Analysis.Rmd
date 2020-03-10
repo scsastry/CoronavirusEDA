@@ -11,14 +11,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Libraries
 ```{r}
-install.packages("tidyverse")
-install.packages("naniar")
-install.packages("skimr")
-install.packages("visdat")
-install.packages("devtools")
-install.packages("rgeos")
-install.packages("rgdal")
-devtools::install_github("dkahle/ggmap")
+#install.packages("tidyverse")
+#install.packages("naniar")
+#install.packages("skimr")
+#install.packages("visdat")
+#install.packages("devtools")
+#install.packages("rgeos")
+#install.packages("rgdal")
+#devtools::install_github("dkahle/ggmap")
+library(shiny)
+library(shinydashboard)
 library(devtools)
 library(visdat)
 library(tidyverse)
@@ -34,8 +36,63 @@ library(rgdal)
 **Database of Coronavirus cases by geographical and bodily locaiton of isolation.**  
 Reference: Dong E, Du H, Gardner L. An interactive web-based dashboard to track COVID-19 in real time. Lancet Infect Dis; published online Feb 19. https://doi.org/10.1016/S1473-3099(20)30120-1.  
 Data: https://www.kaggle.com/brendaso/2019-coronavirus-dataset-01212020-01262020
+
+Currently displays: 1877 observations
 ```{r}
-readr::read_csv("data/2019_nCoV_20200121_20200206.csv")
+CoV_kaggle <- readr::read_csv("data/2019_nCoV_20200121_20200206.csv")
+CoV_kaggle 
+```
+
+```{r}
+CoV_kaggle$`Last Update` <- as.Date(CoV_kaggle$`Last Update`, format = "%m/%d/%y")
+```
+
+```{r}
+CoV_kaggle
+```
+
+```{r}
+China_tracker <- CoV_kaggle %>% 
+  select(`Province/State`, `Country/Region`, Confirmed, Recovered, Death, `Last Update`) %>%
+  filter(`Country/Region` == "Mainland China") %>%
+  group_by(`Province/State`) %>%
+  summarise(Confirmed = sum(Confirmed, na.rm = TRUE),
+            Recovered = sum(Recovered, na.rm = TRUE), 
+            Death = sum(Death, na.rm = TRUE)) %>%
+  arrange(desc(`Province/State`))
+China_tracker
+```
+
+
+```{r}
+(unique(CoV_kaggle$`Province/State`))
+```
+
+Visualize Confirmed Cases by Country
+
+```{r}
+head(China_tracker,10) %>% 
+  ggplot(aes(x = `Province/State`, y = Confirmed, fill = `Province/State`)) +
+  geom_bar(position = "dodge", color = "black", stat = "Identity") +
+  xlab("Country")  +
+  ylab("Population Growth") +
+  labs(title = "Population Growth of Top 5 Countries Since 1952") +
+  coord_flip()
+  
+```
+
+
+```{r}
+unique(CoV_kaggle$`Province/State`, na.rm = TRUE)
+```
+
+```{r}
+unique(CoV_kaggle$`Country/Region`)
+```
+
+```{r}
+CoV_kaggle[order(CoV_kaggle$`Last Update`),]
+
 ```
 
 **Database of Coronavirus cases by geographical and bodily locaiton of isolation.**  
@@ -48,6 +105,14 @@ readr::read_csv("data/corona_protein.txt")
 ```
 
 ```{r}
-readr::read_csv("data/SARS-CoV-2_Genbank.csv")
+Genbank_CoV <- readr::read_csv("data/SARS-CoV-2_Genbank.csv")
+Genbank_CoV
+```
+
+```{r}
+ui <- dashboardPage(
+  dashboardHeader(),
+  dashboard
+)
 ```
 
