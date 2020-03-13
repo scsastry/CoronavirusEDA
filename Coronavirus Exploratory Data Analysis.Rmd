@@ -11,14 +11,27 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Libraries
 ```{r}
-#install.packages("tidyverse")
-#install.packages("naniar")
-#install.packages("skimr")
-#install.packages("visdat")
-#install.packages("devtools")
-#install.packages("rgeos")
-#install.packages("rgdal")
-#devtools::install_github("dkahle/ggmap")
+
+# install.packages("tidyverse")
+# install.packages("naniar")
+# install.packages("skimr")
+# install.packages("visdat")
+# install.packages("devtools")
+# install.packages("rgeos")
+# install.packages("rgdal")
+# devtools::install_github("dkahle/ggmap")
+# install.packages("shiny")
+#install.packages("httpuv")
+# install.packages("DT")
+# install.packages("rpivotTable")
+# install.packages("plotly")
+# install.packages("openintro")
+# install.packages("highcharacter")
+# devtools::install_github("rstudio/httpuv")
+# devtools::install_github("yihui/mime")
+# devtools::install_github("rstudio/shiny")
+library(flexdashboard)
+library(knitr)
 library(shiny)
 library(shinydashboard)
 library(devtools)
@@ -29,6 +42,12 @@ library(skimr)
 library(ggmap)
 library(rgeos)
 library(rgdal)
+library(DT)
+library(rpivotTable)
+library(ggplot2)
+library(plotly)
+library(openintro)
+library(plyr)
 ```
 
 
@@ -111,8 +130,28 @@ Genbank_CoV
 
 ```{r}
 ui <- dashboardPage(
-  dashboardHeader(),
-  dashboard
-)
+  dashboardHeader(title = "Navigation Pane"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Overview", tabName = "Overview"),
+      menuItem("Map", tabName = "Geographical Coverage")
+    )
+  ),
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "Overview",
+        h2("Summary of Coronavirus Pandemic")
+      ),
+      tabItem(tabName = "Geographical Coverage",
+              h2("Geographical Spread of Coronavirus")
+            )
+          )
+        )
+      )
+
+
+server <- function(input, output){ }
+
+shinyApp(ui, server)
 ```
 

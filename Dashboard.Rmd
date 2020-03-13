@@ -1,0 +1,223 @@
+---
+title: "Covid19 Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    theme:solar
+    orientation: rows
+    vertical_layout: fill
+    socail: ["twitter", "facebook", "menuu"]
+---
+
+```{r setup, include=FALSE}
+install.packages("rworldmap")
+library(flexdashboard)
+library(knitr)
+library(shiny)
+library(shinydashboard)
+library(devtools)
+library(visdat)
+library(tidyverse)
+library(naniar)
+library(skimr)
+library(ggmap)
+library(rgeos)
+library(rgdal)
+library(DT)
+library(rpivotTable)
+library(ggplot2)
+library(plotly)
+library(openintro)
+library(plyr)
+```
+##Data
+**Database of Coronavirus cases by location, death and recovered.**  
+Reference: Dong E, Du H, Gardner L. An interactive web-based dashboard to track COVID-19 in real time. Lancet Infect Dis; published online Feb 19. https://doi.org/10.1016/S1473-3099(20)30120-1.  
+Data: https://www.kaggle.com/brendaso/2019-coronavirus-dataset-01212020-01262020
+
+
+```{r}
+CoV_confirmed <- readr::read_csv("data/time_series_19-covid-Confirmed.csv")
+```
+
+```{r}
+CoV_confirmed <- CoV_confirmed %>%
+  mutate(total_confirmed = rowSums(.[5:54])) %>%
+  arrange(desc(`total_confirmed`))
+
+CoV_confirmed
+```
+
+
+```{r}
+CoV_confirmed_condensed <- CoV_confirmed %>%
+  select(`Country/Region`, total_confirmed) %>%
+  group_by(`Country/Region`) %>%
+  summarise_all(funs(sum)) %>%
+  arrange(desc(`total_confirmed`))
+
+CoV_confirmed_condensed
+```
+```{r}
+CoV_confirmed_condensed[2:10,] %>% 
+  ggplot(aes(x = `Country/Region`, y = total_confirmed, fill = `Country/Region`)) +
+  geom_bar(position = "dodge", color = "black", stat = "Identity") +
+  xlab("Country")  +
+  ylab("Confirmed Cases") +
+  labs(title = "Cases of Coronavirus Since February 22")
+```
+
+
+```{r}
+CoV_confirmed_time <- CoV_confirmed %>%
+  select(`Country/Region`, `1/22/20`:`3/11/20`) %>%
+  group_by(`Country/Region`) %>%
+  summarise_all(funs(sum)) %>%
+  filter(`Country/Region` == "Cruise Ship" | `Country/Region` == "France" | `Country/Region` == "Germany" | `Country/Region` == "Iran" | `Country/Region` == "Italy" | `Country/Region` == "Japan"| `Country/Region` == "Korea, South"| `Country/Region` == "Spain"| `Country/Region` == "US") 
+  # group_by(`Country/Region`) %>%
+  # summarise_all(funs(sum)) 
+
+CoV_confirmed_time %>%
+  pivot_longer(`1/22/20`:`3/11/20`, 
+               names_to = "Date",
+               values_to = "Count")
+  
+
+
+```
+
+```{r}
+strptime(CoV_confirmed_time$Date, "%m/%d/%y")
+```
+
+
+```{r}
+CoV_confirmed_time$Date <- as.Date(CoV_confirmed_time$Date, format = "%m/%d/%y", na.rm = TRUE)
+```
+
+```{r}
+CoV_confirmed_time %>%
+  pivot_longer(`1/22/20`:`3/11/20`, 
+               names_to = "Date",
+               values_to = "Count") %>%
+  group_by(`Country/Region`) %>%
+  ggplot(aes(x = Date, y = Count, col = `Country/Region`)) +
+  geom_line() +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  xlab("Date")  +
+  ylab("Cases of Coronavirus") +
+  labs(title = "Confirmed Cases of Coronavirus Through Time")
+```
+
+```{r}
+library(rworldmap)
+newmap <- getMap(resolution = "low")
+plot(newmap, xlim = c(-20, 59), ylim = c(35, 71), asp = 1)
+points(CoV_confirmed$Long, CoV_confirmed$Lat, col = "red", cex = 1)
+
+```
+```{r}
+points(CoV_confirmed$Long, CoV_confirmed$Lat, col = "red", cex = .6)
+```
+
+```{r}
+CoV_death <- readr::read_csv("data/time_series_19-covid-Deaths.csv")
+```
+```{r}
+CoV_death <- CoV_death %>%
+  mutate(total_death = rowSums(.[5:54])) %>%
+  arrange(desc(`total_death`))
+
+CoV_death
+```
+
+```{r}
+CoV_death_condensed <- CoV_death %>%
+  select(`Country/Region`, total_death) %>%
+  group_by(`Country/Region`) %>%
+  summarise_all(funs(sum)) %>%
+  arrange(desc(`total_death`))
+
+CoV_death_condensed
+```
+
+
+```{r}
+CoV_death_condensed[2:10,] %>% 
+  ggplot(aes(x = `Country/Region`, y = total_death, fill = `Country/Region`)) +
+  geom_bar(position = "dodge", color = "black", stat = "Identity") +
+  xlab("Country")  +
+  ylab("Cases That Resulted in Death") +
+  labs(title = "Mortality Due of Coronavirus Since February 22")
+```
+
+```{r}
+CoV_recovered <- readr::read_csv("data/time_series_19-covid-Recovered.csv")
+```
+
+```{r}
+CoV_recovered <- CoV_recovered %>%
+  mutate(total_recovered = rowSums(.[5:54])) %>%
+  arrange(desc(`total_recovered`))
+
+CoV_recovered
+```
+
+```{r}
+CoV_recovered_condensed <- CoV_recovered %>%
+  select(`Country/Region`, total_recovered) %>%
+  group_by(`Country/Region`) %>%
+  summarise_all(funs(sum)) %>%
+  arrange(desc(`total_recovered`))
+
+CoV_recovered_condensed
+```
+
+```{r}
+CoV_recovered_time <- CoV_recovered %>%
+  group_by(`Country/Region`) %>%
+  summarise_all(funs(sum)) %>%
+  arrange(desc(`total_recovered`))
+
+CoV_recovered_time
+
+```
+
+
+
+
+
+```{r}
+mycolors <- c("Mango Tango", "Red Violet", "Cerulean", "Dandelion")
+```
+
+Interactive Data Visualization
+=============================================
+
+Row
+---------------------------------------------
+
+### Coronavius Analysis 
+
+```{r}
+valueBox(paste("Deaths"),
+         color = "red")
+```
+
+### Coronavirus 
+
+```{r}
+valueBox(length(CoV_death$`Country/Region`))
+```
+
+### **Deaths***
+
+```{r}
+CoV_recovered_condensed %>%
+  group_by(`Country/Region`) %>%
+  gauge(total_recovered, min = 0, max = 1000000, gaugeSectors(
+  mild = c(0,100),moderate = c(100,1000),bad = c(1000,1000000),colors = c("green", "yellow", "red")
+  ))
+           
+```
+
