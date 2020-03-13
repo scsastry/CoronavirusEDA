@@ -2,7 +2,9 @@
 title: "Coronavirus: Exploratory Data Analysis and Informational Guide"
 author: "Savita Sastry Alejandra Ramirez"
 date: "Winter 2020"
-output: ioslides_presentation
+output: 
+  ioslides_presentation: 
+    keep_md: yes
 background image: ("data/coronavirus_title.jpg")
 ---
 
